@@ -57,6 +57,14 @@ class RemoteInterface {
     // process.stdout.write('\x07')
     client.setEncoding('utf8')
     this.clients.push(client)
+
+    //Inform other clients new player has joined the game
+    for (const user of this.clients) {
+      if (user !== client) {
+        user.write(`A new player has joined the game!\n`);
+      }
+    }
+
     this.resetIdleTimer(client, MAX_IDLE_TIMEOUT / 2)
 
     if (this.newClientHandler) this.newClientHandler(client)
@@ -74,6 +82,13 @@ class RemoteInterface {
   handleClientEnded(client) {
     if (client.idleTimer) clearTimeout(client.idleTimer)
     if (this.clientEndHandler) this.clientEndHandler(client)
+
+    //Inform other clients when a player has left the game
+    for (const user of this.clients) {
+      if (user !== client) {
+        user.write(`Player ${client.server._connectionKey} has left!\n`);
+      }
+    }
   }
 
   bindHandlers(clientDataHandler, newClientHandler, clientEndHandler) {
